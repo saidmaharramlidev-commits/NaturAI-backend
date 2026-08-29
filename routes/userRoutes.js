@@ -1,5 +1,6 @@
 import express from 'express';
 import { createUser, updateUsername } from '../controllers/userController.js';
+import { identifyUser } from '../middleware/identifyUser.js';
 
 const router = express.Router();
 
