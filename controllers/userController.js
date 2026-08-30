@@ -58,3 +58,11 @@ export const updateUsername = async (req, res) => {
         res.status(500).json({ error: 'Something went wrong' });
     }
 };
+
+export const getMe = async (req, res) => {
+    res.json({
+        id: req.user._id,
+        username: req.user.username,
+        streak: req.user.streak,
+    });
+};
