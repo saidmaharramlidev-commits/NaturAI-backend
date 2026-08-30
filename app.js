@@ -7,6 +7,7 @@ import dailyProgressRoutes from './routes/dailyProgressRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
 import answerRoutes from './routes/answerRoutes.js';
 import inboxRoutes from './routes/inboxRoutes.js';
+import statsRoutes from './routes/statsRoutes.js';
 
 
 
@@ -23,6 +24,7 @@ app.use('/api/daily', dailyProgressRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/answers', answerRoutes);
 app.use('/api/inbox', inboxRoutes);
+app.use('/api/stats', statsRoutes);
 
 app.get('/', (req, res) => {
     res.json({ message: 'NaturAI app backend is running' });
