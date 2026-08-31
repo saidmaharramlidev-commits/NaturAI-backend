@@ -1,7 +1,7 @@
 import RoomMessage from '../models/RoomMessage.js';
 import UserDailyProgress from '../models/UserDailyProgress.js';
-import { checkAndCompleteDay } from './dailyProgressController.js';
 import { containsProfanity } from '../wordFilter.js';
+import { checkAndCompleteDay } from './dailyProgressController.js';
 
 const VALID_ROOMS = ['personal', 'job', 'relationships', 'general'];
 const MAX_MESSAGES_PER_DAY = 3;
@@ -92,7 +92,7 @@ export const getRoomMessages = async (req, res) => {
         }
 
         const messages = await RoomMessage.find({ room })
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: 1 })
             .populate('postedBy', 'username');
 
         res.json(messages);
