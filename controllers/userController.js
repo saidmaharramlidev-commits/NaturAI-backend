@@ -1,8 +1,15 @@
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
 const generateToken = (userId) => {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '365d' });
+};
+
+const generateRecoveryCode = () => {
+    // 8-character uppercase alphanumeric, easy to read/type back in
+    return crypto.randomBytes(6).toString('hex').toUpperCase().slice(0, 8);
 };
 
 export const createUser = async (req, res) => {
@@ -13,15 +20,58 @@ export const createUser = async (req, res) => {
             return res.status(400).json({ error: 'Username must be at least 3 characters' });
         }
 
-        const existing = await User.findOne({ username: username.trim() });
+        const trimmed = username.trim();
+
+        const existing = await User.findOne({ username: trimmed });
         if (existing) {
             return res.status(409).json({ error: 'Username already taken' });
         }
 
-        const user = await User.create({ username: username.trim() });
+        const recoveryCode = generateRecoveryCode();
+        const recoveryCodeHash = await bcrypt.hash(recoveryCode, 10);
+
+        const user = await User.create({
+            username: trimmed,
+            recoveryCodeHash,
+        });
+
         const token = generateToken(user._id);
 
         res.status(201).json({
+            token,
+            username: user.username,
+            streak: user.streak,
+            recoveryCode, // shown once — never returned again after this
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+};
+
+export const recoverAccount = async (req, res) => {
+    try {
+        const { username, recoveryCode } = req.body;
+
+        if (!username || !recoveryCode) {
+            return res.status(400).json({ error: 'Username and recovery code are required' });
+        }
+
+        const user = await User.findOne({ username: username.trim() });
+
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid username or recovery code' });
+        }
+
+        const match = await bcrypt.compare(recoveryCode.trim().toUpperCase(), user.recoveryCodeHash);
+
+        if (!match) {
+            return res.status(401).json({ error: 'Invalid username or recovery code' });
+        }
+
+        const token = generateToken(user._id);
+
+        res.json({
             token,
             username: user.username,
             streak: user.streak,

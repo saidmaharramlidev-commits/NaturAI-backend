@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    recoveryCodeHash: {
+        type: String,
+        required: true,
+    },
 });
 
 const User = mongoose.model('User', userSchema);
