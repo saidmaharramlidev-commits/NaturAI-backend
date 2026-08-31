@@ -2,10 +2,10 @@ const forbiddenWords = [
     // English
     "nigger", "faggot", "retard", "spic", "kike", "nigga", "fck",
     "cunt", "fuck", "shit", "ass", "bitch", "asshole", "cock", "suck",
-    "vagina", "penis", "squirt", "orgasm", "dildo", "vibrator", 'orgasm',
+    "vagina", "penis", "squirt", "orgasm", "dildo", "vibrator", 'orgasm', 'pusy', 'gay', 'les',
 
     // Azerbaijani
-    "göt", "sik", "amcıq", "orospu", "qəhbə", "döş", "peysər", "pesi", "besmantov", "s2", "gey", "vajina", "orgazm",
+    "göt", "sik", "amcıq", "orospu", "qəhbə", "döş", "peysər", "pesi", "besmantov", "s2", "gey", "vajina", "orgazm", 'lez',
 
     // Turkish
     "amcık", "orul", "kahpe",
