@@ -73,6 +73,17 @@ export const postAnswer = async (req, res) => {
 export const getAnswersForQuestion = async (req, res) => {
     try {
         const { questionId } = req.params;
+        const userId = req.user._id;
+
+        const question = await RoomMessage.findById(questionId);
+
+        if (!question) {
+            return res.status(404).json({ error: 'Question not found' });
+        }
+
+        if (question.postedBy.toString() !== userId.toString()) {
+            return res.status(403).json({ error: 'Only the asker can view these answers' });
+        }
 
         const answers = await Answer.find({ question: questionId })
             .sort({ createdAt: 1 })
