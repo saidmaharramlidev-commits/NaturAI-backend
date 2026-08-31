@@ -27,17 +27,18 @@ export const postRoomMessage = async (req, res) => {
             return res.status(400).json({ error: 'Text is too long' });
         }
 
-        // Check user's daily post limit (3 per day, across all rooms)
+        // Check user's daily post limit (3 per day, per room)
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
 
         const postsToday = await RoomMessage.countDocuments({
             postedBy: userId,
+            room, // now scoped to this specific room, not global
             createdAt: { $gte: startOfDay },
         });
 
         if (postsToday >= MAX_MESSAGES_PER_DAY) {
-            return res.status(429).json({ error: 'Daily posting limit reached' });
+            return res.status(429).json({ error: 'Daily posting limit reached for this room' });
         }
 
         // General room = "general" type, others = "question" type
