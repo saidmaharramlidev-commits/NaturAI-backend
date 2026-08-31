@@ -27,6 +27,10 @@ export const postAnswer = async (req, res) => {
             return res.status(400).json({ error: 'This post cannot be answered' });
         }
 
+        if (question.postedBy.toString() === userId.toString()) {
+            return res.status(403).json({ error: "You can't answer your own question" });
+        }
+
         if (question.answerCount >= MAX_ANSWERS_PER_QUESTION) {
             return res.status(400).json({ error: 'This question already has the maximum number of answers' });
         }

@@ -49,38 +49,6 @@ export const createUser = async (req, res) => {
     }
 };
 
-export const recoverAccount = async (req, res) => {
-    try {
-        const { username, recoveryCode } = req.body;
-
-        if (!username || !recoveryCode) {
-            return res.status(400).json({ error: 'Username and recovery code are required' });
-        }
-
-        const user = await User.findOne({ username: username.trim() });
-
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid username or recovery code' });
-        }
-
-        const match = await bcrypt.compare(recoveryCode.trim().toUpperCase(), user.recoveryCodeHash);
-
-        if (!match) {
-            return res.status(401).json({ error: 'Invalid username or recovery code' });
-        }
-
-        const token = generateToken(user._id);
-
-        res.json({
-            token,
-            username: user.username,
-            streak: user.streak,
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Something went wrong' });
-    }
-};
 
 export const updateUsername = async (req, res) => {
     try {
