@@ -1,6 +1,7 @@
 import Answer from '../models/Answer.js';
 import RoomMessage from '../models/RoomMessage.js';
 import InboxItem from '../models/InboxItem.js';
+import { containsProfanity } from '../wordFilter.js';
 
 const MAX_ANSWERS_PER_QUESTION = 5;
 
@@ -15,6 +16,11 @@ export const postAnswer = async (req, res) => {
 
         if (text.length > 500) {
             return res.status(400).json({ error: 'Text is too long' });
+
+        }
+
+        if (containsProfanity(text)) {
+            return res.status(400).json({ error: 'Your message contains inappropriate language' });
         }
 
         const question = await RoomMessage.findById(questionId);

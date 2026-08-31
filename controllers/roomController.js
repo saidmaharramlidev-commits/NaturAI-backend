@@ -1,6 +1,7 @@
 import RoomMessage from '../models/RoomMessage.js';
 import UserDailyProgress from '../models/UserDailyProgress.js';
 import { checkAndCompleteDay } from './dailyProgressController.js';
+import { containsProfanity } from '../wordFilter.js';
 
 const VALID_ROOMS = ['personal', 'job', 'relationships', 'general'];
 const MAX_MESSAGES_PER_DAY = 3;
@@ -25,6 +26,10 @@ export const postRoomMessage = async (req, res) => {
 
         if (text.length > 500) {
             return res.status(400).json({ error: 'Text is too long' });
+        }
+
+        if (containsProfanity(text)) {
+            return res.status(400).json({ error: 'Your message contains inappropriate language' });
         }
 
         // Check user's daily post limit (3 per day, per room)
