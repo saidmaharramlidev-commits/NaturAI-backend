@@ -100,7 +100,7 @@ export const getRoomMessages = async (req, res) => {
             return res.status(400).json({ error: 'Invalid room' });
         }
 
-        const messages = await RoomMessage.find({ room })
+        const messages = await RoomMessage.find({ room, hidden: { $ne: true } })
             .sort({ createdAt: 1 })
             .populate('postedBy', 'username');
 
