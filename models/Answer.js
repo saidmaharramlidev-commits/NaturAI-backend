@@ -20,6 +20,10 @@ const answerSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    hidden: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const Answer = mongoose.model('Answer', answerSchema);

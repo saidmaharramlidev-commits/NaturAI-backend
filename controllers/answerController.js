@@ -64,6 +64,7 @@ export const postAnswer = async (req, res) => {
         }
 
         inboxItem.answers.push({
+            answerRef: answer._id,
             text: text.trim(),
             answeredBy: userId,
         });

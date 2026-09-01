@@ -29,6 +29,10 @@ const roomMessageSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    hidden: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const RoomMessage = mongoose.model('RoomMessage', roomMessageSchema);

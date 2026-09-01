@@ -4,11 +4,9 @@ import InboxItem from '../models/InboxItem.js';
 export const getInbox = async (req, res) => {
     try {
         const userId = req.user._id;
-
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
 
-        // Clean up this user's stale unliked items before returning results
         await InboxItem.deleteMany({
             askedBy: userId,
             isLiked: false,
@@ -19,7 +17,13 @@ export const getInbox = async (req, res) => {
             .sort({ createdAt: -1 })
             .populate('answers.answeredBy', 'username');
 
-        res.json(items);
+        // Strip hidden answers before sending to the client
+        const filtered = items.map((item) => ({
+            ...item.toObject(),
+            answers: item.answers.filter((a) => !a.hidden),
+        }));
+
+        res.json(filtered);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Something went wrong' });
