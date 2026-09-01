@@ -2,10 +2,12 @@ import RoomMessage from '../models/RoomMessage.js';
 import UserDailyProgress from '../models/UserDailyProgress.js';
 import { containsProfanity } from '../wordFilter.js';
 import { checkAndCompleteDay } from './dailyProgressController.js';
+import Answer from '../models/Answer.js';
+import Report from '../models/Report.js';
 
 const VALID_ROOMS = ['personal', 'job', 'relationships', 'general'];
 const MAX_MESSAGES_PER_DAY = 3;
-const MAX_MESSAGES_PER_ROOM = 50;
+const MAX_MESSAGES_PER_ROOM = 5;
 
 const getTodayString = () => {
     return new Date().toISOString().split('T')[0];
@@ -64,6 +66,13 @@ export const postRoomMessage = async (req, res) => {
                 .sort({ createdAt: 1 })
                 .limit(excess);
             const idsToDelete = oldestMessages.map((m) => m._id);
+
+            // Cascade: remove any Answers that belonged to the messages being evicted
+            await Answer.deleteMany({ question: { $in: idsToDelete } });
+
+            // Cascade: remove any Reports that targeted the messages being evicted
+            await Report.deleteMany({ targetType: 'message', targetId: { $in: idsToDelete } });
+
             await RoomMessage.deleteMany({ _id: { $in: idsToDelete } });
         }
 
