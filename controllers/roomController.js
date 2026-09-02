@@ -7,7 +7,7 @@ import Report from '../models/Report.js';
 
 const VALID_ROOMS = ['personal', 'job', 'relationships', 'general'];
 const MAX_MESSAGES_PER_DAY = 3;
-const MAX_MESSAGES_PER_ROOM = 5;
+const MAX_MESSAGES_PER_ROOM = 30;
 
 const getTodayString = () => {
     return new Date().toISOString().split('T')[0];
