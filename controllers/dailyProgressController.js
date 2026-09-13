@@ -1,6 +1,6 @@
 import DailyContent from '../models/DailyContent.js';
-import UserDailyProgress from '../models/UserDailyProgress.js';
 import User from '../models/User.js';
+import UserDailyProgress from '../models/UserDailyProgress.js';
 
 const getTodayString = () => {
     return new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
@@ -16,27 +16,23 @@ export const getTodayProgress = async (req, res) => {
             .populate('assignedQuote')
             .populate('assignedStory');
 
-        if (!progress) {
-            const quotes = await DailyContent.aggregate([
-                { $match: { type: 'quote', active: true } },
-                { $sample: { size: 1 } },
-            ]);
-            const stories = await DailyContent.aggregate([
-                { $match: { type: 'story', active: true } },
-                { $sample: { size: 1 } },
-            ]);
-
-            if (!quotes.length || !stories.length) {
-                return res.status(500).json({ error: 'No content available yet' });
+        if (progress && (!progress.assignedQuote || !progress.assignedStory)) {
+            // A referenced DailyContent was deleted after this progress doc was created — re-pick
+            if (!progress.assignedQuote) {
+                const quotes = await DailyContent.aggregate([
+                    { $match: { type: 'quote', active: true } },
+                    { $sample: { size: 1 } },
+                ]);
+                if (quotes.length) progress.assignedQuote = quotes[0]._id;
             }
-
-            progress = await UserDailyProgress.create({
-                user: userId,
-                date: today,
-                assignedQuote: quotes[0]._id,
-                assignedStory: stories[0]._id,
-            });
-
+            if (!progress.assignedStory) {
+                const stories = await DailyContent.aggregate([
+                    { $match: { type: 'story', active: true } },
+                    { $sample: { size: 1 } },
+                ]);
+                if (stories.length) progress.assignedStory = stories[0]._id;
+            }
+            await progress.save();
             progress = await UserDailyProgress.findById(progress._id)
                 .populate('assignedQuote')
                 .populate('assignedStory');

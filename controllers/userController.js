@@ -77,10 +77,28 @@ export const updateUsername = async (req, res) => {
     }
 };
 
+const getTodayString = () => new Date().toISOString().split('T')[0];
+const getYesterdayString = () =>
+    new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
 export const getMe = async (req, res) => {
+    const user = req.user;
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+
+    if (
+        user.lastCompletedDate &&
+        user.lastCompletedDate !== today &&
+        user.lastCompletedDate !== yesterday &&
+        user.streak !== 0
+    ) {
+        user.streak = 0;
+        await user.save();
+    }
+
     res.json({
-        id: req.user._id,
-        username: req.user.username,
-        streak: req.user.streak,
+        id: user._id,
+        username: user.username,
+        streak: user.streak,
     });
 };
