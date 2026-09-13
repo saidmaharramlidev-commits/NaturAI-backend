@@ -99,7 +99,11 @@ export const markQuoteSeen = async (req, res) => {
         await progress.save();
         await checkAndCompleteDay(progress, req.user._id);
 
-        res.json(progress);
+        const populated = await UserDailyProgress.findById(progress._id)
+            .populate('assignedQuote')
+            .populate('assignedStory');
+
+        res.json(populated);
     } catch (error) {
         res.status(500).json({ error: 'Something went wrong' });
     }
@@ -115,7 +119,11 @@ export const markStorySeen = async (req, res) => {
         await progress.save();
         await checkAndCompleteDay(progress, req.user._id);
 
-        res.json(progress);
+        const populated = await UserDailyProgress.findById(progress._id)
+            .populate('assignedQuote')
+            .populate('assignedStory');
+
+        res.json(populated);
     } catch (error) {
         res.status(500).json({ error: 'Something went wrong' });
     }
