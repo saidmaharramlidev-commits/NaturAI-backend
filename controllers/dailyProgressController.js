@@ -6,7 +6,6 @@ const getTodayString = () => {
     return new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
 };
 
-// GET today's progress (creates it if it doesn't exist yet)
 export const getTodayProgress = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -16,8 +15,33 @@ export const getTodayProgress = async (req, res) => {
             .populate('assignedQuote')
             .populate('assignedStory');
 
-        if (progress && (!progress.assignedQuote || !progress.assignedStory)) {
-            // A referenced DailyContent was deleted after this progress doc was created — re-pick
+        if (!progress) {
+            // No progress doc yet for today — create one with freshly picked content
+            const quotes = await DailyContent.aggregate([
+                { $match: { type: 'quote', active: true } },
+                { $sample: { size: 1 } },
+            ]);
+            const stories = await DailyContent.aggregate([
+                { $match: { type: 'story', active: true } },
+                { $sample: { size: 1 } },
+            ]);
+
+            if (!quotes.length || !stories.length) {
+                return res.status(500).json({ error: 'No content available yet' });
+            }
+
+            progress = await UserDailyProgress.create({
+                user: userId,
+                date: today,
+                assignedQuote: quotes[0]._id,
+                assignedStory: stories[0]._id,
+            });
+
+            progress = await UserDailyProgress.findById(progress._id)
+                .populate('assignedQuote')
+                .populate('assignedStory');
+        } else if (!progress.assignedQuote || !progress.assignedStory) {
+            // Existing doc, but a referenced DailyContent was deleted — re-pick
             if (!progress.assignedQuote) {
                 const quotes = await DailyContent.aggregate([
                     { $match: { type: 'quote', active: true } },
